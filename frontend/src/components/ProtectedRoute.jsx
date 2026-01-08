@@ -21,7 +21,8 @@ export default function ProtectedRoute({ children, allowedRoles }) {
                   student: ["student"],
                   teacher: ["student", "teacher"],
                   admin: ["student", "teacher", "admin"],
-                  superadmin: ["student", "teacher", "admin", "superadmin"]
+                  superadmin: ["student", "teacher", "admin", "superadmin"],
+                  parent: ["parent"]
             };
 
             const userRoles = roleHierarchy[user.role] || [];

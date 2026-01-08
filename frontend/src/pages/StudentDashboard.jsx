@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
       LogOut, Calendar, Award, BookOpen, TrendingUp, Clock,
       AlertCircle, CheckCircle2, FileText, IndianRupee, Megaphone,
-      Bus, Menu, X, Home
+      Bus, Menu, X, Home, MessageCircle
 } from "lucide-react";
 import TimetableView from "../components/TimetableView";
 import ProfileForm from "../components/ProfileForm";
@@ -18,6 +19,7 @@ import StudentTransport from "../components/transport/StudentTransport";
 
 export default function StudentDashboard() {
       const { user, logout } = useAuth();
+      const navigate = useNavigate();
       const [activeTab, setActiveTab] = useState("attendance");
       const [isSidebarOpen, setIsSidebarOpen] = useState(false);
       const [attendanceData, setAttendanceData] = useState({ stats: {}, history: [] });
@@ -61,6 +63,7 @@ export default function StudentDashboard() {
             { id: "notices", label: "Notices", icon: Megaphone },
             { id: "transport", label: "Transport", icon: Bus },
             { id: "profile", label: "Profile", icon: CheckCircle2 },
+            { id: "messages", label: "Messages", icon: MessageCircle },
       ];
 
       return (
@@ -94,6 +97,10 @@ export default function StudentDashboard() {
                                           <button
                                                 key={item.id}
                                                 onClick={() => {
+                                                      if (item.id === "messages") {
+                                                            navigate("/chat");
+                                                            return;
+                                                      }
                                                       setActiveTab(item.id);
                                                       setIsSidebarOpen(false);
                                                 }}

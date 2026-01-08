@@ -8,9 +8,13 @@ const userSchema = new mongoose.Schema(
             password: { type: String, required: true },
             role: {
                   type: String,
-                  enum: ["superadmin", "admin", "teacher", "student", "staff"],
+                  enum: ["superadmin", "admin", "teacher", "student", "staff", "parent"],
                   required: true,
             },
+            children: [{
+                  type: mongoose.Schema.Types.ObjectId,
+                  ref: "User"
+            }],
             designation: { type: String }, // For staff (e.g., Driver, Peon)
             schoolId: {
                   type: mongoose.Schema.Types.ObjectId,

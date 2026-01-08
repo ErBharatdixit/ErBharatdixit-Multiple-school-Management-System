@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, User, Mail, Lock, Phone, BookOpen, Hash, Building2, Briefcase, IndianRupee } from "lucide-react";
+import { X, User, Mail, Lock, Phone, BookOpen, Hash, Building2, Briefcase, IndianRupee, Search } from "lucide-react";
 import api from "../api";
 
 export default function AddUserModal({ isOpen, onClose, role, onUserAdded, initialData }) {
@@ -19,6 +19,8 @@ export default function AddUserModal({ isOpen, onClose, role, onUserAdded, initi
       const [loading, setLoading] = useState(false);
       const [error, setError] = useState("");
       const [teachers, setTeachers] = useState([]);
+      const [allStudents, setAllStudents] = useState([]); // For parent to select children
+      const [studentSearch, setStudentSearch] = useState(""); // Search state
       const [isExistingTeacher, setIsExistingTeacher] = useState(false);
       const [classes, setClasses] = useState([]);
 
@@ -28,6 +30,10 @@ export default function AddUserModal({ isOpen, onClose, role, onUserAdded, initi
             }
             if (isOpen && role === "staff") {
                   fetchTeachers();
+            }
+            if (isOpen && role === "parent") {
+                  fetchStudents();
+                  setStudentSearch(""); // Reset search on open
             }
             if (isOpen && initialData) {
                   setFormData({
@@ -42,6 +48,7 @@ export default function AddUserModal({ isOpen, onClose, role, onUserAdded, initi
                         basicSalary: initialData.salaryDetails?.basicSalary || 0,
                         allowances: initialData.salaryDetails?.allowances || 0,
                         deductions: initialData.salaryDetails?.deductions || 0,
+                        children: initialData.children?.map(c => c._id) || []
                   });
                   setIsExistingTeacher(false); // Reset when editing specific user
             } else if (isOpen && !initialData) {
@@ -62,9 +69,11 @@ export default function AddUserModal({ isOpen, onClose, role, onUserAdded, initi
                   designation: "",
                   basicSalary: 0,
                   allowances: 0,
-                  deductions: 0
+                  deductions: 0,
+                  children: []
             });
             setError("");
+            setStudentSearch("");
       };
 
       const fetchClasses = async () => {
@@ -82,6 +91,15 @@ export default function AddUserModal({ isOpen, onClose, role, onUserAdded, initi
                   setTeachers(res.data);
             } catch (err) {
                   console.error("Failed to fetch teachers", err);
+            }
+      };
+
+      const fetchStudents = async () => {
+            try {
+                  const res = await api.get("/users/students");
+                  setAllStudents(res.data);
+            } catch (err) {
+                  console.error("Failed to fetch students", err);
             }
       };
 
@@ -141,6 +159,9 @@ export default function AddUserModal({ isOpen, onClose, role, onUserAdded, initi
                   } else if (role === "staff") {
                         endpoint = initialData ? `/users/staff/${initialData._id}` : "/users/staff";
                         method = initialData ? "put" : "post";
+                  } else if (role === "parent") {
+                        endpoint = initialData ? `/users/parent/${initialData._id}` : "/users/parent";
+                        method = initialData ? "put" : "post";
                   }
 
                   // Prepare payload with salary structure
@@ -166,6 +187,13 @@ export default function AddUserModal({ isOpen, onClose, role, onUserAdded, initi
                   setLoading(false);
             }
       };
+
+      // Filter students based on search
+      const filteredStudents = allStudents.filter(student =>
+            student.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
+            student.rollNo?.toString().includes(studentSearch) ||
+            student.email?.toLowerCase().includes(studentSearch.toLowerCase())
+      );
 
       return (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm animate-fade-in">
@@ -359,6 +387,59 @@ export default function AddUserModal({ isOpen, onClose, role, onUserAdded, initi
                                                       placeholder="e.g. Driver, Peon, Guard"
                                                 />
                                           </div>
+                                    </div>
+                              )}
+
+                              {role === "parent" && (
+                                    <div className="md:col-span-2">
+                                          <label className="block text-sm font-medium text-gray-700 mb-2">Select Children (Students)</label>
+
+                                          {/* Search Input for Students */}
+                                          <div className="relative mb-2">
+                                                <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                                                <input
+                                                      type="text"
+                                                      value={studentSearch}
+                                                      onChange={(e) => setStudentSearch(e.target.value)}
+                                                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                                                      placeholder="Search by Name or Roll No..."
+                                                />
+                                          </div>
+
+                                          <div className="border border-gray-200 rounded-lg max-h-40 overflow-y-auto p-2 bg-gray-50">
+                                                {filteredStudents.length > 0 ? (
+                                                      filteredStudents.map(student => (
+                                                            <div key={student._id} className="flex items-center p-2 hover:bg-white rounded transition">
+                                                                  <input
+                                                                        type="checkbox"
+                                                                        id={`student-${student._id}`}
+                                                                        checked={(formData.children || []).includes(student._id)}
+                                                                        onChange={(e) => {
+                                                                              const isChecked = e.target.checked;
+                                                                              const currentChildren = formData.children || [];
+                                                                              if (isChecked) {
+                                                                                    setFormData({ ...formData, children: [...currentChildren, student._id] });
+                                                                              } else {
+                                                                                    setFormData({ ...formData, children: currentChildren.filter(id => id !== student._id) });
+                                                                              }
+                                                                        }}
+                                                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                                                  />
+                                                                  <label htmlFor={`student-${student._id}`} className="ml-3 block text-sm text-gray-700 cursor-pointer w-full">
+                                                                        <span className="font-semibold">{student.name}</span>
+                                                                        <span className="text-gray-500 text-xs ml-2">
+                                                                              (Class: {student.classId?.name}-{student.classId?.section}, Roll: {student.rollNo})
+                                                                        </span>
+                                                                  </label>
+                                                            </div>
+                                                      ))
+                                                ) : (
+                                                      <p className="text-sm text-gray-500 text-center py-4">
+                                                            {studentSearch ? "No students match your search." : "No students available to link."}
+                                                      </p>
+                                                )}
+                                          </div>
+                                          <p className="text-xs text-gray-500 mt-1">Check the students that belong to this parent.</p>
                                     </div>
                               )}
 

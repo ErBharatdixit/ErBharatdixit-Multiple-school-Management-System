@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
       LayoutDashboard, Megaphone, Bus, FileText, Clock, ClipboardList, ShieldCheck,
       Briefcase, IndianRupee, Users as UsersIcon, UserCheck,
-      School, BookOpen, Plus, Search, Book, Edit, Trash2, CalendarDays, Eye, Menu, X, LogOut, Users
+      School, BookOpen, Plus, Search, Book, Edit, Trash2, CalendarDays, Eye, Menu, X, LogOut, Users, MessageCircle
 } from "lucide-react";
 import api from "../api";
 import AddUserModal from "../components/AddUserModal";
@@ -25,10 +26,12 @@ import SalaryManager from "../components/SalaryManager";
 
 export default function AdminDashboard() {
       const { user, logout } = useAuth();
+      const navigate = useNavigate();
       const [activeTab, setActiveTab] = useState("teachers");
       const [teachers, setTeachers] = useState([]);
       const [students, setStudents] = useState([]);
       const [staff, setStaff] = useState([]);
+      const [parents, setParents] = useState([]);
       const [isSidebarOpen, setIsSidebarOpen] = useState(false);
       const [isModalOpen, setIsModalOpen] = useState(false);
       const [isClassModalOpen, setIsClassModalOpen] = useState(false);
@@ -42,14 +45,16 @@ export default function AdminDashboard() {
 
       const fetchAllUsers = async () => {
             try {
-                  const [teachersRes, studentsRes, staffRes] = await Promise.all([
+                  const [teachersRes, studentsRes, staffRes, parentsRes] = await Promise.all([
                         api.get("/users/teachers"),
                         api.get("/users/students"),
-                        api.get("/users/staff")
+                        api.get("/users/staff"),
+                        api.get("/users/parents")
                   ]);
                   setTeachers(teachersRes.data);
                   setStudents(studentsRes.data);
                   setStaff(staffRes.data);
+                  setParents(parentsRes.data);
             } catch (error) {
                   console.error("Failed to fetch dashboard data:", error);
             }
@@ -80,7 +85,7 @@ export default function AdminDashboard() {
             setIsModalOpen(true);
       };
 
-      const filteredUsers = (activeTab === "teachers" ? teachers : activeTab === "students" ? students : staff).filter(u =>
+      const filteredUsers = (activeTab === "teachers" ? teachers : activeTab === "students" ? students : activeTab === "parents" ? parents : staff).filter(u =>
             u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             u.email.toLowerCase().includes(searchTerm.toLowerCase())
       );
@@ -88,6 +93,7 @@ export default function AdminDashboard() {
       const menuItems = [
             { id: "teachers", label: "Teachers", icon: UserCheck },
             { id: "students", label: "Students", icon: UsersIcon },
+            { id: "parents", label: "Parents", icon: Users },
             { id: "staff", label: "Staff", icon: Briefcase },
             { id: "classes", label: "Classes", icon: School },
             { id: "subjects", label: "Subjects", icon: BookOpen },
@@ -101,6 +107,7 @@ export default function AdminDashboard() {
             { id: "timetable", label: "Timetable", icon: Clock },
             { id: "attendance", label: "Attendance", icon: ClipboardList },
             { id: "verification", label: "Verification", icon: ShieldCheck },
+            { id: "messages", label: "Messages", icon: MessageCircle },
       ];
 
       return (
@@ -134,6 +141,10 @@ export default function AdminDashboard() {
                                           <button
                                                 key={item.id}
                                                 onClick={() => {
+                                                      if (item.id === "messages") {
+                                                            navigate("/chat");
+                                                            return;
+                                                      }
                                                       setActiveTab(item.id);
                                                       setIsSidebarOpen(false);
                                                       setSearchTerm("");
@@ -224,12 +235,21 @@ export default function AdminDashboard() {
                                                 <Briefcase className="w-6 h-6 text-purple-600" />
                                           </div>
                                     </div>
+                                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+                                          <div>
+                                                <p className="text-sm font-medium text-gray-500">Total Parents</p>
+                                                <p className="text-2xl font-extrabold text-gray-900 mt-1">{parents.length}</p>
+                                          </div>
+                                          <div className="p-3 bg-orange-50 rounded-xl">
+                                                <Users className="w-6 h-6 text-orange-600" />
+                                          </div>
+                                    </div>
                                     {/* Additional stats specific to active tab could go here if implemented, or generic stats */}
                               </div>
 
                               {/* Action Bar */}
                               <div className="flex flex-col sm:flex-row gap-4 justify-between items-center mb-6">
-                                    {(activeTab === "teachers" || activeTab === "students" || activeTab === "staff") && (
+                                    {(activeTab === "teachers" || activeTab === "students" || activeTab === "staff" || activeTab === "parents") && (
                                           <div className="relative w-full sm:w-96">
                                                 <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                                                 <input
@@ -258,7 +278,7 @@ export default function AdminDashboard() {
                                                 className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-sm hover:shadow-md whitespace-nowrap"
                                           >
                                                 <Plus className="w-5 h-5" />
-                                                Add {activeTab === "staff" ? "Staff" : activeTab.slice(0, -1).replace(/^\w/, c => c.toUpperCase())}
+                                                Add {activeTab === "staff" ? "Staff" : activeTab === "parents" ? "Parent" : activeTab.slice(0, -1).replace(/^\w/, c => c.toUpperCase())}
                                           </button>
                                     )}
                               </div>
@@ -315,6 +335,8 @@ export default function AdminDashboard() {
                                                                               <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Subject</th>
                                                                         ) : activeTab === "staff" ? (
                                                                               <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Designation</th>
+                                                                        ) : activeTab === "parents" ? (
+                                                                              <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Children</th>
                                                                         ) : (
                                                                               <>
                                                                                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Class</th>
@@ -345,6 +367,16 @@ export default function AdminDashboard() {
                                                                                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{user.subject || "-"}</td>
                                                                                     ) : activeTab === "staff" ? (
                                                                                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{user.designation || "-"}</td>
+                                                                                    ) : activeTab === "parents" ? (
+                                                                                          <td className="px-6 py-4 text-sm text-gray-600">
+                                                                                                <div className="flex flex-wrap gap-1">
+                                                                                                      {user.children?.length > 0 ? user.children.map(child => (
+                                                                                                            <span key={child._id} className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium">
+                                                                                                                  {child.name} ({child.classId?.name || "?"})
+                                                                                                            </span>
+                                                                                                      )) : <span className="text-gray-400">No linked students</span>}
+                                                                                                </div>
+                                                                                          </td>
                                                                                     ) : (
                                                                                           <>
                                                                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
@@ -402,7 +434,7 @@ export default function AdminDashboard() {
                         <AddUserModal
                               isOpen={isModalOpen}
                               onClose={() => { setIsModalOpen(false); setEditUser(null); }}
-                              role={activeTab === "teachers" ? "teacher" : activeTab === "staff" ? "staff" : "student"}
+                              role={activeTab === "teachers" ? "teacher" : activeTab === "staff" ? "staff" : activeTab === "parents" ? "parent" : "student"}
                               onUserAdded={handleRefresh}
                               initialData={editUser}
                         />

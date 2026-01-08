@@ -7,8 +7,8 @@ const salarySchema = new mongoose.Schema(
                   ref: "User",
                   required: true,
             },
-            month: { type: String, required: true }, // e.g., "January"
-            year: { type: Number, required: true }, // e.g., 2024
+            month: { type: String, required: true }, 
+            year: { type: Number, required: true }, 
             amount: { type: Number, required: true },
             status: {
                   type: String,

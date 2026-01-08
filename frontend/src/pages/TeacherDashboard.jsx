@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
       LogOut, LayoutDashboard, ClipboardList, GraduationCap, Calendar,
-      Clock, UserCheck, FileText, Megaphone, Menu, X, BookOpen, Award, Users
+      Clock, UserCheck, FileText, Megaphone, Menu, X, BookOpen, Award, Users, MessageCircle
 } from "lucide-react";
 import TeacherAttendance from "../components/TeacherAttendance";
 import TimetableView from "../components/TimetableView";
@@ -22,6 +23,7 @@ import api from "../api";
 
 export default function TeacherDashboard() {
       const { user, logout } = useAuth();
+      const navigate = useNavigate();
       const [activeTab, setActiveTab] = useState("student-attendance");
       const [classes, setClasses] = useState([]);
       const [selectedClass, setSelectedClass] = useState("");
@@ -52,6 +54,7 @@ export default function TeacherDashboard() {
             { id: "assignments", label: "Assignments", icon: BookOpen },
             { id: "profile", label: "My Profile", icon: UserCheck },
             { id: "notices", label: "Notices", icon: Megaphone },
+            { id: "messages", label: "Messages", icon: MessageCircle },
       ];
 
       return (
@@ -85,6 +88,10 @@ export default function TeacherDashboard() {
                                           <button
                                                 key={item.id}
                                                 onClick={() => {
+                                                      if (item.id === "messages") {
+                                                            navigate("/chat");
+                                                            return;
+                                                      }
                                                       setActiveTab(item.id);
                                                       setIsSidebarOpen(false);
                                                 }}

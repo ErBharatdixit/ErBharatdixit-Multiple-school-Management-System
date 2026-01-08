@@ -327,3 +327,109 @@ export const getStudents = async (req, res) => {
             res.status(500).json({ message: error.message });
       }
 };
+
+// @desc    Get all parents for the current school
+// @route   GET /api/users/parents
+// @access  Private/Admin
+export const getParents = async (req, res) => {
+      try {
+            const parents = await User.find({
+                  schoolId: req.user.schoolId,
+                  role: "parent"
+            })
+                  .select("-password")
+                  .populate("children", "name classId rollNo");
+            res.json(parents);
+      } catch (error) {
+            res.status(500).json({ message: error.message });
+      }
+};
+
+// @desc    Create a new parent
+// @route   POST /api/users/parent
+// @access  Private/Admin
+export const createParent = async (req, res) => {
+      try {
+            console.log("Create Parent Request Body:", req.body);
+            const { name, email, password, phone, children } = req.body;
+
+            const userExists = await User.findOne({ email });
+            if (userExists) {
+                  return res.status(400).json({ message: "User already exists with this email" });
+            }
+
+            const user = await User.create({
+                  name,
+                  email,
+                  password,
+                  role: "parent",
+                  schoolId: req.user.schoolId,
+                  phone,
+                  children: children || [] // Array of student IDs
+            });
+
+            console.log("Parent Created:", user);
+
+            if (user) {
+                  res.status(201).json({
+                        _id: user._id,
+                        name: user.name,
+                        email: user.email,
+                        role: user.role,
+                        schoolId: user.schoolId,
+                        children: user.children
+                  });
+            } else {
+                  res.status(400).json({ message: "Invalid user data" });
+            }
+      } catch (error) {
+            console.error("Create Parent Error:", error);
+            res.status(500).json({ message: error.message });
+      }
+};
+
+// @desc    Update parent details
+// @route   PUT /api/users/parent/:id
+// @access  Private/Admin
+export const updateParent = async (req, res) => {
+      try {
+            const { name, phone, email, children } = req.body;
+
+            const parent = await User.findOne({
+                  _id: req.params.id,
+                  schoolId: req.user.schoolId,
+                  role: "parent"
+            });
+
+            if (!parent) {
+                  return res.status(404).json({ message: "Parent not found" });
+            }
+
+            if (email && email !== parent.email) {
+                  const emailExists = await User.findOne({ email, _id: { $ne: parent._id } });
+                  if (emailExists) {
+                        return res.status(400).json({ message: "Email already in use" });
+                  }
+            }
+
+            parent.name = name || parent.name;
+            parent.phone = phone || parent.phone;
+            parent.email = email || parent.email;
+            if (children) parent.children = children;
+
+            if (req.body.password) parent.password = req.body.password;
+
+            await parent.save();
+
+            res.json({
+                  _id: parent._id,
+                  name: parent.name,
+                  email: parent.email,
+                  role: parent.role,
+                  phone: parent.phone,
+                  children: parent.children
+            });
+      } catch (error) {
+            res.status(500).json({ message: error.message });
+      }
+};

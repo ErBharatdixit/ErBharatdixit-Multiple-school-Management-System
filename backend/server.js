@@ -26,6 +26,8 @@ import leaveRoutes from "./src/routes/leave.js";
 import noticeRoutes from "./src/routes/notice.js";
 import transportRoutes from "./src/routes/transport.js";
 import salaryRoutes from "./src/routes/salary.js";
+import parentRoutes from "./src/routes/parent.js";
+import messageRoutes from "./src/routes/message.js";
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -42,8 +44,10 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
+// Serve static files
 app.use("/uploads", express.static("uploads"));
+
+// Routes
 
 app.get("/", (req, res) => {
       res.json({ message: "School Management System API" });
@@ -65,6 +69,8 @@ app.use("/api/leaves", leaveRoutes);
 app.use("/api/notices", noticeRoutes);
 app.use("/api/transport", transportRoutes);
 app.use("/api/salary", salaryRoutes);
+app.use("/api/parent", parentRoutes);
+app.use("/api/messages", messageRoutes);
 
 // Error handler
 app.use(errorHandler);
@@ -73,12 +79,12 @@ const startServer = async () => {
       try {
             await connectDB();
 
-            console.log("🔍 Testing MongoDB connection...");
+            console.log("Testing MongoDB connection...");
             await mongoose.connection.db.admin().ping();
-            console.log("✅ MongoDB ping successful");
+            console.log(" MongoDB ping successful");
 
             app.listen(PORT, () => {
-                  console.log(`🚀 Server running at http://localhost:${PORT}`);
+                  console.log(`Server running at http://localhost:${PORT}`);
             });
       } catch (error) {
             console.error("Failed to start server:", error);
