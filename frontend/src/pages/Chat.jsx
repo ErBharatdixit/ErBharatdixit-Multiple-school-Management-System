@@ -400,11 +400,11 @@ const Chat = () => {
                                                                                     {msg.attachments.map((att, i) => (
                                                                                           <div key={i} className="rounded overflow-hidden">
                                                                                                 {att.fileType === 'image' ? (
-                                                                                                      <img src={`http://localhost:8000${att.url}`} alt="attachment" className="max-w-full h-auto rounded max-h-60 object-cover cursor-pointer hover:opacity-90 transition-opacity" />
+                                                                                                      <img src={`https://multiple-school-management.onrender.com${att.url}`} alt="attachment" className="max-w-full h-auto rounded max-h-60 object-cover cursor-pointer hover:opacity-90 transition-opacity" />
                                                                                                 ) : att.fileType === 'video' ? (
-                                                                                                      <video controls src={`http://localhost:8000${att.url}`} className="max-w-full rounded max-h-60" />
+                                                                                                      <video controls src={`https://multiple-school-management.onrender.com${att.url}`} className="max-w-full rounded max-h-60" />
                                                                                                 ) : (
-                                                                                                      <a href={`http://localhost:8000${att.url}`} target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 p-2 rounded ${isMe ? "bg-blue-700/50 hover:bg-blue-700" : "bg-gray-100 hover:bg-gray-200"} transition-colors`}>
+                                                                                                      <a href={`https://multiple-school-management.onrender.com${att.url}`} target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 p-2 rounded ${isMe ? "bg-blue-700/50 hover:bg-blue-700" : "bg-gray-100 hover:bg-gray-200"} transition-colors`}>
                                                                                                             <FileText size={20} />
                                                                                                             <span className="truncate max-w-[150px]">{att.originalName}</span>
                                                                                                       </a>

@@ -14,7 +14,7 @@ export const SocketProvider = ({ children }) => {
 
       useEffect(() => {
             if (user) {
-                  socketRef.current = io('http://localhost:8000');
+                  socketRef.current = io('https://multiple-school-management.onrender.com');
 
                   socketRef.current.on('connect', () => {
 
