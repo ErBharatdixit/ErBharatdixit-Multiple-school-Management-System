@@ -210,7 +210,10 @@ export const updateStudent = async (req, res) => {
 // @access  Private/Admin
 export const getStaff = async (req, res) => {
       try {
-            const staff = await User.find({ role: "staff", schoolId: req.user.schoolId }).select("-password");
+            const staff = await User.find({
+                  role: { $in: ["staff", "teacher"] },
+                  schoolId: req.user.schoolId
+            }).select("-password");
             res.json(staff);
       } catch (error) {
             res.status(500).json({ message: "Server error" });

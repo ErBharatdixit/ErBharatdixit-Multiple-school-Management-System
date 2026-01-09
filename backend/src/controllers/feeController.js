@@ -7,10 +7,17 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const razorpay = new Razorpay({
-      key_id: process.env.RAZORPAY_KEY_ID,
-      key_secret: process.env.RAZORPAY_KEY_SECRET
-});
+const razorpay =
+      process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET
+            ? new Razorpay({
+                  key_id: process.env.RAZORPAY_KEY_ID,
+                  key_secret: process.env.RAZORPAY_KEY_SECRET
+            })
+            : null;
+
+if (!razorpay) {
+      console.warn("Razorpay keys missing. Payment features will be disabled.");
+}
 
 // @desc    Create a new fee structure
 // @route   POST /api/fees/structure
@@ -64,6 +71,10 @@ export const getFeeStructures = async (req, res) => {
 export const createPaymentOrder = async (req, res) => {
       try {
             const { amount } = req.body;
+
+            if (!razorpay) {
+                  return res.status(503).json({ message: "Payment gateway not configured" });
+            }
 
             const options = {
                   amount: amount * 100, // Amount in paise
