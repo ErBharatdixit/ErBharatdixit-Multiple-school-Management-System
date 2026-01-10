@@ -1,6 +1,9 @@
 # 🏫 Multiple School Management System
 
+
 A modern, production-ready school management system built with the MERN stack (MongoDB, Express, React, Node.js). Supports multiple schools with role-based access control for SuperAdmins, Admins, Teachers, and Students.
+
+**🚀 Live Demo:** [https://erbharatdixit-multiple-school-management.onrender.com/login](https://erbharatdixit-multiple-school-management.onrender.com/login)
 
 ## ✨ Features
 
