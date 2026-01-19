@@ -106,7 +106,7 @@ export default function Signup() {
                                           value={formData.name}
                                           onChange={handleChange}
                                           className="w-full px-5 py-3 bg-white/10 border border-white/20 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-transparent transition text-white placeholder-white/50 backdrop-blur-sm"
-                                          placeholder="John Doe"
+                                          placeholder="Bharat Dixit"
                                     />
                               </div>
 
@@ -122,7 +122,7 @@ export default function Signup() {
                                           value={formData.email}
                                           onChange={handleChange}
                                           className="w-full px-5 py-3 bg-white/10 border border-white/20 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-transparent transition text-white placeholder-white/50 backdrop-blur-sm"
-                                          placeholder="you@example.com"
+                                          placeholder="bharat01@gmail.com"
                                     />
                               </div>
 
